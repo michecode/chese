@@ -9,6 +9,7 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
   console.log(path != '/' && path != '/404');
 
   if (path != '/' && path != '/404') {
+    console.log('returning alt nav');
     return (
       <header>
         <div className="flex justify-end text-black mx-12 mt-12">
@@ -34,7 +35,7 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
     );
   }
 
-  console.log(path);
+  console.log('returning nav');
 
   return (
     <header>

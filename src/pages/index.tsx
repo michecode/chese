@@ -52,15 +52,15 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
         <div className="flex justify-around mt-20">
           <div className="flex flex-col">
             <img src={CharOne} />
-            <text className="mx-auto">Character #9432</text>
+            <p className="mx-auto">Character #9432</p>
           </div>
           <div className="flex flex-col">
             <img src={CharTwo} />
-            <text className="mx-auto">Character #3267</text>
+            <p className="mx-auto">Character #3267</p>
           </div>
           <div className="flex flex-col">
             <img src={CharThree} />
-            <text className="mx-auto">Character #1372</text>
+            <p className="mx-auto">Character #1372</p>
           </div>
         </div>
       </div>
