@@ -15,10 +15,13 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.2",
     "gatsby": "^4.7.2",
     "gatsby-plugin-postcss": "^5.7.0",
     "postcss": "^8.4.6",
+    "prettier": "^2.5.1",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "tailwindcss": "^3.0.23"
   }
 }
