@@ -14,6 +14,8 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
     setOnHome(state);
   }
 
+  console.log(path != '/' && path != '/404');
+
   if (path != '/' && path != '/404') {
     return (
       <header>
