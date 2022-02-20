@@ -1,19 +1,11 @@
 import * as React from 'react';
-import { useState } from 'react';
 import { Link } from 'gatsby';
-import Gradient from '../images/iridescent-gradient.png';
 
 interface NavigationProps {
   path: string;
 }
 
 const Navigation: React.FC<NavigationProps> = ({ path }) => {
-  const [onHome, setOnHome] = React.useState(true);
-
-  function changeHomeState(state: boolean) {
-    setOnHome(state);
-  }
-
   console.log(path != '/' && path != '/404');
 
   if (path != '/' && path != '/404') {
@@ -42,7 +34,6 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
     );
   }
 
-  console.log(onHome);
   console.log(path);
 
   return (
