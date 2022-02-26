@@ -10,13 +10,12 @@ declare global {
   }
 }
 
+let providerTemp: ethers.providers.Web3Provider | undefined;
 // Checking window for undefined for build time
 // Is ok to run further with undefined.
 if (typeof window !== 'undefined') {
-  const providerTemp = new ethers.providers.Web3Provider(window.ethereum);
+  providerTemp = new ethers.providers.Web3Provider(window.ethereum);
 }
-
-const providerTemp;
 
 // Plants test contract
 const CONTRACT_ADDRESS_OLD = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
@@ -65,7 +64,8 @@ const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   const [provider, setProvider] = useState(providerTemp);
   const [signer, setSigner] = useState(undefined);
   const [contract, setContract] = useState(
-    new ethers.Contract(CONTRACT_ADDRESS, Chese.abi, providerTemp),
+    // if(typeof providerTemp == ethers.providers.Web3Provider)
+    new ethers.Contract(CONTRACT_ADDRESS, Chese.abi),
   );
   const [account, setAccount] = useState('Not Connected');
   const updateAccount = (accountTemp: string) => {
