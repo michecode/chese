@@ -11,4 +11,7 @@ typechain
 
 #Hardhat files
 cache
-artifacts
+# including abis by avoiding the contracts folder
+@openzeppelin
+build-info
+hardhat
