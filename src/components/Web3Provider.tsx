@@ -16,9 +16,7 @@ const CONTRACT_ADDRESS_OLD = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 const CONTRACT_ADDRESS_OLD_2 = '0x958C8511E7D21aFE59A4FcAe0aC93bBe615Af583';
 // Chese V0.1 Rinkeby Address
 const CONTRACT_ADDRESS = '0x85810707E13EF8aD77E4666E59246CE652696e1D';
-const providerTemp = new ethers.providers.Web3Provider(
-  (window as any).ethereum,
-);
+const providerTemp = new ethers.providers.Web3Provider(window.ethereum);
 
 interface IWeb3Context {
   contractAddress: string;
