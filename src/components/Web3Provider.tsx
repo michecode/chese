@@ -16,6 +16,8 @@ if (typeof window !== 'undefined') {
   const providerTemp = new ethers.providers.Web3Provider(window.ethereum);
 }
 
+const providerTemp;
+
 // Plants test contract
 const CONTRACT_ADDRESS_OLD = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 // Chese V0.1 Goerli Address
