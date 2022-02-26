@@ -1,18 +1,25 @@
 {
-  "include": ["./src/**/*", "index.d.ts"],
+  "include": ["./scripts", "./test", "./typechain", "./src/**/*", "index.d.ts"],
+  "files": ["./hardhat.config.ts"],
   "compilerOptions": {
+    // "target": "es2018",
+    // needed to run hardhat
+    "module": "commonjs",
     "target": "esnext",
-    "module": "esnext",
+    // "module": "esnext",
     "moduleResolution": "node",
     "lib": ["dom", "es2017"],
-    // "allowJs": true,
-    // "checkJs": true,
     "jsx": "react",
     "strict": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noEmit": true,
-    "skipLibCheck": true
+    // "allowJs": true,
+    // "checkJs": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "declaration": true,
+    "resolveJsonModule": true
   }
 }
