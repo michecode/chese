@@ -69,7 +69,7 @@ const Listing: React.FC<ListingProps> = ({
     setMedia(getMediaURL(result));
   };
 
-  const getMediaURL = (nft: Object) => {
+  const getMediaURL = (nft: NFTRes) => {
     let mediaURL = '';
     console.log('getting URL media from metadata');
     if (nft.media[0].gateway == '') {

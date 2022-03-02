@@ -45,7 +45,7 @@ interface ListingCollectionProps {
   dropState: boolean;
   setDropState: Function;
   isMarketpagePage: boolean;
-  listings: {}[];
+  listings: Listing[];
   columns: number;
 }
 
@@ -71,8 +71,8 @@ const ListingCollection: React.FC<ListingCollectionProps> = ({
   */
   const listCollection = () => {
     let count = 0;
-    if (listings.length != 0 && listings[0] != {}) {
-      return checkListings().map((nft: Object) => {
+    if (listings.length != 0) {
+      return checkListings().map((nft: Listing) => {
         count++;
 
         const priceRaw = BigNumber.from(nft.price?._hex);

@@ -16,7 +16,11 @@ interface CollectionProps {
   dropState: boolean;
   setDropState: Function;
   headline: string;
-  nfts: {};
+  nfts: {
+    ownedNfts: NFTRes[];
+    totalCount: number;
+    blockHask: string;
+  };
   refresh: Function;
   columns: number;
   clickToList: boolean;
@@ -43,7 +47,7 @@ const Collection: React.FC<CollectionProps> = ({
     }
   };
 
-  const getMediaURL = (nft: Object) => {
+  const getMediaURL = (nft: NFTRes) => {
     let mediaURL = '';
     if (nft.media[0].gateway == '') {
       if (nft.metadata.image == '') {
@@ -76,7 +80,7 @@ const Collection: React.FC<CollectionProps> = ({
   const listCollection = (clickToList: boolean, listFunc?: Function) => {
     let count = 0;
     if (nfts.totalCount != 0) {
-      return prepNfts().map((nft: Object) => {
+      return prepNfts().map((nft: NFTRes) => {
         // console.log('collection: ' + nft.title);
         // console.log(
         //   'Fetching media for ' + nft.title + ' at ' + nft.media[0].gateway,

@@ -19,45 +19,18 @@ import ListingCollection from '../../components/ListingCollection';
 omg!??!?!11! why are you using axios and fetch. because. i need axios for pinata and im not fixing fetch rn.
 */
 
-const rkAlc =
-  'https://eth-rinkeby.alchemyapi.io/v2/ChZmc9ztzVWiU3oWRuAjwU_sUEEPaDgW';
-const mnAlc = `https://eth-mainnet.alchemyapi.io/v2/pSfImfCndXbVYu10T1hcSyUkfzWm8AiV`;
+const rkAlc = process.env.GATSBY_RINKEBY_ALCAPI;
+
+const emptyAlcRes = {
+  ownedNfts: [],
+  totalCount: 0,
+  blockHash: '',
+};
 
 const Index: React.FC<PageProps> = (props: PageProps) => {
   const W3C = useW3Context();
-  // const W3C = useContext(Web3Context);
-  // const [nfts, setNfts] = useState({
-  //   ownedNfts: [{
-  //     contract: {
-  //       address: ''
-  //     },
-  //     id: {
-  //       tokenId: ''
-  //     },
-  //     balance: 0
-  //   }],
-  //   totalCount: 0,
-  //   blockHash: '',
-  // });
 
-  const placeholderNFTResponse = {
-    ownedNfts: [
-      {
-        contract: {},
-        description: '',
-        id: {},
-        media: [],
-        metadata: {},
-        timeLastUpdated: '',
-        title: '',
-        tokenUri: {},
-      },
-    ],
-    blockHash: '',
-    totalCount: 0,
-  };
-
-  const [nfts, setNfts] = useState(placeholderNFTResponse);
+  const [nfts, setNfts] = useState<AlchemyAPIResponse>(emptyAlcRes);
   const [listings, setListings] = useState([{}]);
   const [dropListings, setDropListings] = useState(true);
   const [dropCollection, setDropCollection] = useState(true);
@@ -67,14 +40,13 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
   /*
   States below are for listing + minting states in controlled components
   */
-  // const [listingName, set] = useState('');
   const [listingPrice, setListingPrice] = useState('1');
   const [listingTitle, setListingTitle] = useState('');
   const [mediaPreviewURL, setMediaPreviewURL] = useState('');
   const [listingContract, setListingContract] = useState('');
   const [listingTokenId, setListingTokenId] = useState('');
   const [slices, setSlices] = useState(1);
-  const [nftMedia, setNftMedia] = useState();
+  const [nftMedia, setNftMedia] = useState<object>({});
   const [nftMediaUpload, setNftMediaUpload] = useState('');
   const [nftTitle, setNftTitle] = useState('');
   // This isn't a state because it breaks if it is a state..? The set function lags behind one call for no reason.
@@ -158,7 +130,6 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
   };
 
   const onFileChange = (newValue: any) => {
-    console.log(newValue);
     setNftMedia(newValue);
     setNftMediaUpload(URL.createObjectURL(newValue[0]));
     console.log('File Uploaded. Preview src @' + nftMediaUpload);
@@ -440,41 +411,5 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
     </Layout>
   );
 };
-
-function CaretDown() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      height="36"
-      width="36"
-    >
-      <path
-        xmlns="http://www.w3.org/2000/svg"
-        d="M17 10L12 16L7 10H17Z"
-        fill="#0D0D0D"
-      ></path>
-    </svg>
-  );
-}
-
-function CaretUp() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      height="36"
-      width="36"
-    >
-      <path
-        xmlns="http://www.w3.org/2000/svg"
-        d="M7 14L12 8L17 14L7 14Z"
-        fill="#0D0D0D"
-      ></path>
-    </svg>
-  );
-}
 
 export default Index;
