@@ -3,7 +3,10 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 
 /*
@@ -11,8 +14,11 @@ import "@openzeppelin/contracts/utils/Address.sol";
 @author michecode
 @desc practicing solidity and ether front end. simple buy and sell nft martketplace. no bidding.
 */
-contract Chese is Ownable {
-  using Address for address;
+contract Chese is Ownable, ReentrancyGuard {
+  using Counters for Counters.Counter;
+  Counters.Counter private _itemIds;
+  // Not active contains items that are either sold or delisted.
+  Counters.Counter private _itemsNotActive;
 
   /*
   @params
@@ -25,105 +31,181 @@ contract Chese is Ownable {
   seller - address of account who listed
   */
   struct Listing {
-    uint id;
-    bool active;
-    string name;
-    uint price;
-    uint tokenId;
+    uint itemId;
     address nftContract;
+    uint256 tokenId;
+    uint256 price;
     address payable seller;
+    address payable owner;
+    bool active;
   }
 
-  // 
-  event NewListing(uint id, string name, address seller);
-  // 
-  event RemovedListing(uint id, string name, address seller);
 
-  // Map listing id to seller
-  mapping (uint => address) public listingToSeller;
-  // Map address to listing amount
+  // 
+  event NewListing(
+    uint indexed listingId,
+    address indexed nftContract,
+    uint256 indexed tokenId,
+    address seller,
+    address owner,
+    uint256 price,
+    bool active
+    );
+  //
+  event ListingSold(
+    uint indexed listingId,
+    address owner
+  );
+  // 
+  event RemovedListing(
+    uint indexed listingId,
+    address indexed nftContract,
+    uint256 indexed tokenId,
+    address seller
+  );
+
   mapping (address => uint) public sellerListingCount;
-
-  /*
-  @dev EXTREMELY BAD!! Should be fine on testnet but this array just grows forever since I don't want to
-  rearrange too much and cause a million writes
-  */
-  Listing[] public listings;
-  
-  // 
-  uint public activeListings = 0;
+  // Map list ID to listing object. Acts as a Listing[] kinda
+  mapping (uint256 => Listing) private idToListing;
 
   constructor() {
     console.log("Deploying chese contract!!");
+  }
+
+  function getApproval(address nftContract) public {
+
   }
 
   /*
   @notice Create a listing
   @dev
   */
-  function createListing(string memory _name, uint _price, uint _tokenId, address _nftContract) public payable {
-    require(_price > 0, "Price must not be zero");
-    listings.push(Listing(listings.length, true, _name, _price, _tokenId, _nftContract, payable(msg.sender)));
-    uint id = listings.length - 1;
-    listingToSeller[id] = msg.sender;
+  function createListing(address nftContract, uint256 tokenId, uint256 price) public payable nonReentrant {
+    require(price > 100, "Price must be above 100 wei");
+    _itemIds.increment();
+    uint256 itemId = _itemIds.current();
+
+    // Create new Listing
+    idToListing[itemId] = Listing(
+      itemId,
+      nftContract,
+      tokenId,
+      price,
+      payable(msg.sender),
+      payable(address(0)),
+      true
+    );
+
+    // Transfer NFT into Chese
+    IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
     sellerListingCount[msg.sender]++;
-    activeListings++;
-    console.log("Creating a new listing with id: ", id);
-    emit NewListing(id, _name, msg.sender);
+
+    emit NewListing(
+      itemId,
+      nftContract,
+      tokenId,
+      msg.sender,
+      address(0),
+      price,
+      false
+    );
   }
 
-  // checkes to see if the caller actually owns the listing
-  modifier ownsListing(uint _listingId) {
-    require(listingToSeller[_listingId] == msg.sender, "You do not own this listing");
+  function createListingSale(address nftContract, uint256 itemId) public payable nonReentrant {
+    uint price = idToListing[itemId].price;
+    uint tokenId = idToListing[itemId].tokenId;
+    bool active = idToListing[itemId].active;
+
+    require(msg.value == price, "Transaction value != Price");
+    require(active == true, "This listing is not active.");
+    
+    emit ListingSold(
+      itemId,
+      msg.sender
+    );
+
+    sellerListingCount[idToListing[itemId].seller]--;
+    idToListing[itemId].seller.transfer(msg.value);
+    IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
+    idToListing[itemId].owner = payable(msg.sender);
+    _itemsNotActive.increment();
+    idToListing[itemId].active = false;
+  }
+
+  // Checkes to see if the caller actually owns the listing
+  modifier ownsListing(uint itemId) {
+    require(idToListing[itemId].seller == msg.sender, "You do not own this listing.");
     _;
   }
 
   // Removes listings
-  function removeListing(uint _listingId) public ownsListing(_listingId) {
-    listings[_listingId].active = false;
-    listingToSeller[_listingId] = address(0);
-    sellerListingCount[msg.sender]--;
-    activeListings--;
-    console.log("Removing a listing with id: ", _listingId);
-    emit RemovedListing(_listingId, listings[_listingId].name, msg.sender);
+  function unlist(uint itemId) public ownsListing(itemId) {
+    sellerListingCount[idToListing[itemId].seller]--;
+    IERC721(idToListing[itemId].nftContract).transferFrom(address(this), msg.sender, idToListing[itemId].tokenId);
+    _itemsNotActive.increment();
+    idToListing[itemId].active = false;
+    idToListing[itemId].owner = payable(msg.sender);
+    emit RemovedListing(itemId, idToListing[itemId].nftContract, idToListing[itemId].tokenId, idToListing[itemId].seller);
   }
 
   function getNumActiveListings() public view returns(uint) {
-    return activeListings;
+    return (_itemIds.current() - _itemsNotActive.current());
   }
 
   // Gets all active listings
-  function getActiveListings() public view returns(uint[] memory) {
-    uint[] memory result = new uint[](activeListings);
-    uint counter = 0;
-    for(uint i=0; i < listings.length; i++) {
-      if(listings[i].active) {
-        result[counter] = i;
-        counter++;
+  function fetchListings() public view returns (Listing[] memory) {
+      uint itemCount = _itemIds.current();
+      uint activeItemCount = _itemIds.current() - _itemsNotActive.current();
+      uint currentIndex = 0;
+
+      console.log(itemCount);
+      console.log(activeItemCount);
+      Listing[] memory items = new Listing[](activeItemCount);
+      for (uint i = 0; i < itemCount; i++) {
+        console.log(i);
+          if (idToListing[i + 1].owner == address(0)) {
+              console.log("active listing");
+              uint currentId = i + 1;
+              Listing storage currentItem = idToListing[currentId];
+              items[currentIndex] = currentItem;
+              currentIndex += 1;
+          }
       }
-    }
-    return result;
+      return items;
   }
 
-  // Gets price of listing x. No gas cost.
-  function getPrice(uint _listingId) public view returns(uint) {
-    return listings[_listingId].price;
+  // Fetches all listings including inactive. Not sure when I'll need it.
+  function fetchAllListings() public view returns(Listing[] memory) {
+    uint itemCount = _itemIds.current();
+    Listing[] memory items = new Listing[](itemCount);
+    for(uint i = 0; i < itemCount; i++) {
+      items[i] = idToListing[i+1];
+    }
+    return items;
   }
 
   // Gets all listings from an address
-  function getSellersListings(address _seller) public view returns(uint[] memory) {
-    uint[] memory result = new uint[](sellerListingCount[_seller]);
-    uint counter = 0;
-    for(uint i=0; i < listings.length; i++) {
-      if(listingToSeller[i] == _seller) {
-        result[counter] = i;
-        counter++;
+  function fetchSellerListings(address seller) public view returns(Listing[] memory) {
+    uint itemCount = _itemIds.current();
+    uint sellerItemCount = sellerListingCount[seller];
+    uint index = 0;
+
+    Listing[] memory items = new Listing[](sellerItemCount);
+
+    for(uint i = 0; i < itemCount; i++) {
+      console.log(i);
+      if(idToListing[i + 1].seller == seller && idToListing[i + 1].active) {
+        Listing storage currentItem = idToListing[i + 1];
+        items[index] = currentItem;
+        index += 1;
       }
     }
-    return result;
+    return items;
   }
 
-  // function buyListing(uint _listingId) public returns(boolean) {
-
+  // Withdraw fees
+  // function withdraw() public onlyOwner() {
+  //   address owner = owner();
+  //   payable(owner).transfer(address(this).balance);
   // }
 }

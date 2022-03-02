@@ -1,5 +1,8 @@
 import * as React from 'react';
 import UnlistedNFT from './UnlistedNFT';
+import CaretUp from '../icons/CaretUp';
+import CaretDown from '../icons/CaretDown';
+import RefreshIcon from '../icons/RefreshIcon';
 
 /*
 @params
@@ -14,6 +17,7 @@ interface CollectionProps {
   setDropState: Function;
   headline: string;
   nfts: {};
+  refresh: Function;
   columns: number;
   clickToList: boolean;
   selectFunction: Function | undefined;
@@ -24,6 +28,7 @@ const Collection: React.FC<CollectionProps> = ({
   setDropState,
   headline,
   nfts,
+  refresh,
   columns,
   clickToList,
   selectFunction,
@@ -31,11 +36,34 @@ const Collection: React.FC<CollectionProps> = ({
   // @returns array of ownedNfts if the nfts.ownedNfts is not empty e.g data has been fetched from alchemy
   const prepNfts = () => {
     if (nfts.ownedNfts != []) {
-      console.log(nfts.ownedNfts);
+      // console.log(nfts.ownedNfts);
       return nfts.ownedNfts;
     } else {
       return [];
     }
+  };
+
+  const getMediaURL = (nft: Object) => {
+    let mediaURL = '';
+    if (nft.media[0].gateway == '') {
+      if (nft.metadata.image == '') {
+        fetch(nft.tokenURI.raw, {
+          method: 'GET',
+          redirect: 'follow',
+        })
+          .then((response) => response.json())
+          // .then((response) => JSON.stringify(response, null, 2))
+          .then((result) => {
+            mediaURL = result.image;
+          })
+          .catch((error) => console.log(error));
+      } else {
+        mediaURL = nft.metadata.image;
+      }
+    } else {
+      mediaURL = nft.media[0].gateway;
+    }
+    return mediaURL;
   };
 
   /*
@@ -54,33 +82,54 @@ const Collection: React.FC<CollectionProps> = ({
         //   'Fetching media for ' + nft.title + ' at ' + nft.media[0].gateway,
         // );
         count++;
+
+        // check for image links. fetch if needed.
+        let mediaURL = getMediaURL(nft);
         return (
           <UnlistedNFT
-            mediaURL={nft.media[0].gateway}
+            mediaURL={mediaURL}
             title={nft.title}
             contractAddr={nft.contract.address}
+            tokenId={nft.id.tokenId}
             clickToList={clickToList}
             listFunc={listFunc}
+            overlapHackFix={true}
             key={count}
           />
         );
       });
     } else {
-      return <></>;
+      return <div>No NFTs found.</div>;
     }
   };
 
+  // I have to do these variables for some reason. It breaks otherwise lol.
+  const col3 = 'grid-cols-3';
+  const col5 = 'grid-cols-5';
+
   return (
     <div className="flex flex-col">
-      <div
-        className="text-5xl flex cursor-pointer"
-        onClick={() => setDropState(!dropState)}
-      >
-        {headline} {dropState ? <CaretUp /> : <CaretDown />}
+      <div className="text-5xl flex cursor-pointer">
+        <span onClick={() => setDropState(!dropState)} className="flex">
+          {headline} {dropState ? <CaretUp /> : <CaretDown />}
+        </span>
+        <button
+          className={
+            'bg-black hover:cursor-pointer text-white text-xl mx-2 px-2 rounded-xl ' +
+            (dropState ? '' : 'hidden')
+          }
+          onClick={() => refresh()}
+        >
+          <RefreshIcon />
+        </button>
       </div>
+
       <div
         className={
-          `grid grid-cols-${columns} gap-x-2 gap-y-4 ` +
+          'grid ' +
+          (columns == 5 ? col5 : '') +
+          (columns == 3 ? col3 : '') +
+          ' gap-x-2 gap-y-4 ' +
           (dropState ? '' : 'hidden')
         }
       >
@@ -89,41 +138,5 @@ const Collection: React.FC<CollectionProps> = ({
     </div>
   );
 };
-
-function CaretDown() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      height="36"
-      width="36"
-    >
-      <path
-        xmlns="http://www.w3.org/2000/svg"
-        d="M17 10L12 16L7 10H17Z"
-        fill="#0D0D0D"
-      ></path>
-    </svg>
-  );
-}
-
-function CaretUp() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      height="36"
-      width="36"
-    >
-      <path
-        xmlns="http://www.w3.org/2000/svg"
-        d="M7 14L12 8L17 14L7 14Z"
-        fill="#0D0D0D"
-      ></path>
-    </svg>
-  );
-}
 
 export default Collection;

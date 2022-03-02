@@ -27,12 +27,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
           <br /> created by curated artists
         </h1>
         <div className="w-1/4 mr-[8%] ml-8">
-          <Link to="/marketplace/sample">
-            <img
-              src={SkatePic}
-              className="bg-white hover:bg-black p-4 rounded-3xl"
-            />
-          </Link>
+          <img src={SkatePic} className="bg-white p-4 rounded-3xl" />
           <div className="bg-white p-4 rounded-2xl mt-4 flex">
             <span className="text-xl w-2/3">
               Skateboarding: Culture in Motion #57

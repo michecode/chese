@@ -14,20 +14,21 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  /*
-  const Plants = await ethers.getContractFactory('Plants');
-  const plants = await Plants.deploy();
+  if (true) {
+    const Chese = await ethers.getContractFactory('Chese');
+    const chese = await Chese.deploy();
 
-  await plants.deployed();
+    await chese.deployed();
 
-  console.log('Plants deployed to:', plants.address);
-  */
-  const Chese = await ethers.getContractFactory('Chese');
-  const chese = await Chese.deploy();
+    console.log('Chese deployed to: ', chese.address);
+  } else {
+    const CheseNFTs = await ethers.getContractFactory('CheseNFTs');
+    const cheseNfts = await CheseNFTs.deploy();
 
-  await chese.deployed();
+    await cheseNfts.deployed();
 
-  console.log('Chese deployed to: ', chese.address);
+    console.log('Chese NFT Minter deployed to: ', cheseNfts.address);
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

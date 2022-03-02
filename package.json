@@ -15,10 +15,13 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
-    "@alch/alchemy-web3": "^1.2.4",
     "autoprefixer": "^10.4.2",
+    "axios": "^0.26.0",
+    "electron": "^17.1.0",
+    "electron-fetch": "^1.7.4",
     "gatsby": "^4.7.2",
     "gatsby-plugin-postcss": "^5.7.0",
+    "ipfs-http-client": "^56.0.1",
     "postcss": "^8.4.6",
     "prettier": "^2.5.1",
     "react": "^17.0.1",

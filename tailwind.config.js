@@ -8,8 +8,8 @@ module.exports = {
       backgroundImage: {
         gradient: "url('../images/iridescent-gradient.png')",
       },
-      backgroundSize: {
-        fill: 'length:100%',
+      colors: {
+        blackrgba: 'rgba(0,0,0,0.8)',
       },
     },
   },

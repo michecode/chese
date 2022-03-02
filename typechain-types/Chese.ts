@@ -18,62 +18,80 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
+export declare namespace Chese {
+  export type ListingStruct = {
+    itemId: BigNumberish;
+    nftContract: string;
+    tokenId: BigNumberish;
+    price: BigNumberish;
+    seller: string;
+    owner: string;
+    active: boolean;
+  };
+
+  export type ListingStructOutput = [
+    BigNumber,
+    string,
+    BigNumber,
+    BigNumber,
+    string,
+    string,
+    boolean
+  ] & {
+    itemId: BigNumber;
+    nftContract: string;
+    tokenId: BigNumber;
+    price: BigNumber;
+    seller: string;
+    owner: string;
+    active: boolean;
+  };
+}
+
 export interface CheseInterface extends utils.Interface {
   contractName: "Chese";
   functions: {
-    "activeListings()": FunctionFragment;
-    "createListing(string,uint256,uint256,address)": FunctionFragment;
-    "getActiveListings()": FunctionFragment;
+    "createListing(address,uint256,uint256)": FunctionFragment;
+    "createListingSale(address,uint256)": FunctionFragment;
+    "fetchAllListings()": FunctionFragment;
+    "fetchListings()": FunctionFragment;
+    "fetchSellerListings(address)": FunctionFragment;
+    "getApproval(address)": FunctionFragment;
     "getNumActiveListings()": FunctionFragment;
-    "getPrice(uint256)": FunctionFragment;
-    "getSellersListings(address)": FunctionFragment;
-    "listingToSeller(uint256)": FunctionFragment;
-    "listings(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
-    "removeListing(uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "sellerListingCount(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "unlist(uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "activeListings",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "createListing",
-    values: [string, BigNumberish, BigNumberish, string]
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getActiveListings",
+    functionFragment: "createListingSale",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fetchAllListings",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "fetchListings",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fetchSellerListings",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "getApproval", values: [string]): string;
   encodeFunctionData(
     functionFragment: "getNumActiveListings",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getPrice",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getSellersListings",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "listingToSeller",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "listings",
-    values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "removeListing",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
@@ -85,38 +103,40 @@ export interface CheseInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "unlist",
+    values: [BigNumberish]
+  ): string;
 
-  decodeFunctionResult(
-    functionFragment: "activeListings",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "createListing",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getActiveListings",
+    functionFragment: "createListingSale",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "fetchAllListings",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "fetchListings",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "fetchSellerListings",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getApproval",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "getNumActiveListings",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "getPrice", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getSellersListings",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "listingToSeller",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "listings", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "removeListing",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -129,21 +149,39 @@ export interface CheseInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "unlist", data: BytesLike): Result;
 
   events: {
-    "NewListing(uint256,string,address)": EventFragment;
+    "ListingSold(uint256,address)": EventFragment;
+    "NewListing(uint256,address,uint256,address,address,uint256,bool)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
-    "RemovedListing(uint256,string,address)": EventFragment;
+    "RemovedListing(uint256,address,uint256,address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "ListingSold"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewListing"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RemovedListing"): EventFragment;
 }
 
+export type ListingSoldEvent = TypedEvent<
+  [BigNumber, string],
+  { listingId: BigNumber; owner: string }
+>;
+
+export type ListingSoldEventFilter = TypedEventFilter<ListingSoldEvent>;
+
 export type NewListingEvent = TypedEvent<
-  [BigNumber, string, string],
-  { id: BigNumber; name: string; seller: string }
+  [BigNumber, string, BigNumber, string, string, BigNumber, boolean],
+  {
+    listingId: BigNumber;
+    nftContract: string;
+    tokenId: BigNumber;
+    seller: string;
+    owner: string;
+    price: BigNumber;
+    active: boolean;
+  }
 >;
 
 export type NewListingEventFilter = TypedEventFilter<NewListingEvent>;
@@ -157,8 +195,13 @@ export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
 export type RemovedListingEvent = TypedEvent<
-  [BigNumber, string, string],
-  { id: BigNumber; name: string; seller: string }
+  [BigNumber, string, BigNumber, string],
+  {
+    listingId: BigNumber;
+    nftContract: string;
+    tokenId: BigNumber;
+    seller: string;
+  }
 >;
 
 export type RemovedListingEventFilter = TypedEventFilter<RemovedListingEvent>;
@@ -191,56 +234,40 @@ export interface Chese extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    activeListings(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     createListing(
-      _name: string,
-      _price: BigNumberish,
-      _tokenId: BigNumberish,
-      _nftContract: string,
+      nftContract: string,
+      tokenId: BigNumberish,
+      price: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    getActiveListings(overrides?: CallOverrides): Promise<[BigNumber[]]>;
+    createListingSale(
+      nftContract: string,
+      itemId: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    fetchAllListings(
+      overrides?: CallOverrides
+    ): Promise<[Chese.ListingStructOutput[]]>;
+
+    fetchListings(
+      overrides?: CallOverrides
+    ): Promise<[Chese.ListingStructOutput[]]>;
+
+    fetchSellerListings(
+      seller: string,
+      overrides?: CallOverrides
+    ): Promise<[Chese.ListingStructOutput[]]>;
+
+    getApproval(
+      nftContract: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     getNumActiveListings(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    getPrice(
-      _listingId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    getSellersListings(
-      _seller: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]]>;
-
-    listingToSeller(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    listings(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, boolean, string, BigNumber, BigNumber, string, string] & {
-        id: BigNumber;
-        active: boolean;
-        name: string;
-        price: BigNumber;
-        tokenId: BigNumber;
-        nftContract: string;
-        seller: string;
-      }
-    >;
-
     owner(overrides?: CallOverrides): Promise<[string]>;
-
-    removeListing(
-      _listingId: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -255,58 +282,47 @@ export interface Chese extends BaseContract {
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    unlist(
+      itemId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
   };
 
-  activeListings(overrides?: CallOverrides): Promise<BigNumber>;
-
   createListing(
-    _name: string,
-    _price: BigNumberish,
-    _tokenId: BigNumberish,
-    _nftContract: string,
+    nftContract: string,
+    tokenId: BigNumberish,
+    price: BigNumberish,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  getActiveListings(overrides?: CallOverrides): Promise<BigNumber[]>;
+  createListingSale(
+    nftContract: string,
+    itemId: BigNumberish,
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  fetchAllListings(
+    overrides?: CallOverrides
+  ): Promise<Chese.ListingStructOutput[]>;
+
+  fetchListings(
+    overrides?: CallOverrides
+  ): Promise<Chese.ListingStructOutput[]>;
+
+  fetchSellerListings(
+    seller: string,
+    overrides?: CallOverrides
+  ): Promise<Chese.ListingStructOutput[]>;
+
+  getApproval(
+    nftContract: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   getNumActiveListings(overrides?: CallOverrides): Promise<BigNumber>;
 
-  getPrice(
-    _listingId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  getSellersListings(
-    _seller: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
-
-  listingToSeller(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  listings(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, boolean, string, BigNumber, BigNumber, string, string] & {
-      id: BigNumber;
-      active: boolean;
-      name: string;
-      price: BigNumber;
-      tokenId: BigNumber;
-      nftContract: string;
-      seller: string;
-    }
-  >;
-
   owner(overrides?: CallOverrides): Promise<string>;
-
-  removeListing(
-    _listingId: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -322,57 +338,43 @@ export interface Chese extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  callStatic: {
-    activeListings(overrides?: CallOverrides): Promise<BigNumber>;
+  unlist(
+    itemId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
+  callStatic: {
     createListing(
-      _name: string,
-      _price: BigNumberish,
-      _tokenId: BigNumberish,
-      _nftContract: string,
+      nftContract: string,
+      tokenId: BigNumberish,
+      price: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    getActiveListings(overrides?: CallOverrides): Promise<BigNumber[]>;
+    createListingSale(
+      nftContract: string,
+      itemId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    fetchAllListings(
+      overrides?: CallOverrides
+    ): Promise<Chese.ListingStructOutput[]>;
+
+    fetchListings(
+      overrides?: CallOverrides
+    ): Promise<Chese.ListingStructOutput[]>;
+
+    fetchSellerListings(
+      seller: string,
+      overrides?: CallOverrides
+    ): Promise<Chese.ListingStructOutput[]>;
+
+    getApproval(nftContract: string, overrides?: CallOverrides): Promise<void>;
 
     getNumActiveListings(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getPrice(
-      _listingId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getSellersListings(
-      _seller: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    listingToSeller(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    listings(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, boolean, string, BigNumber, BigNumber, string, string] & {
-        id: BigNumber;
-        active: boolean;
-        name: string;
-        price: BigNumber;
-        tokenId: BigNumber;
-        nftContract: string;
-        seller: string;
-      }
-    >;
-
     owner(overrides?: CallOverrides): Promise<string>;
-
-    removeListing(
-      _listingId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -385,15 +387,38 @@ export interface Chese extends BaseContract {
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    unlist(itemId: BigNumberish, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
-    "NewListing(uint256,string,address)"(
-      id?: null,
-      name?: null,
-      seller?: null
+    "ListingSold(uint256,address)"(
+      listingId?: BigNumberish | null,
+      owner?: null
+    ): ListingSoldEventFilter;
+    ListingSold(
+      listingId?: BigNumberish | null,
+      owner?: null
+    ): ListingSoldEventFilter;
+
+    "NewListing(uint256,address,uint256,address,address,uint256,bool)"(
+      listingId?: BigNumberish | null,
+      nftContract?: string | null,
+      tokenId?: BigNumberish | null,
+      seller?: null,
+      owner?: null,
+      price?: null,
+      active?: null
     ): NewListingEventFilter;
-    NewListing(id?: null, name?: null, seller?: null): NewListingEventFilter;
+    NewListing(
+      listingId?: BigNumberish | null,
+      nftContract?: string | null,
+      tokenId?: BigNumberish | null,
+      seller?: null,
+      owner?: null,
+      price?: null,
+      active?: null
+    ): NewListingEventFilter;
 
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
@@ -404,56 +429,51 @@ export interface Chese extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "RemovedListing(uint256,string,address)"(
-      id?: null,
-      name?: null,
+    "RemovedListing(uint256,address,uint256,address)"(
+      listingId?: BigNumberish | null,
+      nftContract?: string | null,
+      tokenId?: BigNumberish | null,
       seller?: null
     ): RemovedListingEventFilter;
     RemovedListing(
-      id?: null,
-      name?: null,
+      listingId?: BigNumberish | null,
+      nftContract?: string | null,
+      tokenId?: BigNumberish | null,
       seller?: null
     ): RemovedListingEventFilter;
   };
 
   estimateGas: {
-    activeListings(overrides?: CallOverrides): Promise<BigNumber>;
-
     createListing(
-      _name: string,
-      _price: BigNumberish,
-      _tokenId: BigNumberish,
-      _nftContract: string,
+      nftContract: string,
+      tokenId: BigNumberish,
+      price: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    getActiveListings(overrides?: CallOverrides): Promise<BigNumber>;
+    createListingSale(
+      nftContract: string,
+      itemId: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    fetchAllListings(overrides?: CallOverrides): Promise<BigNumber>;
+
+    fetchListings(overrides?: CallOverrides): Promise<BigNumber>;
+
+    fetchSellerListings(
+      seller: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getApproval(
+      nftContract: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     getNumActiveListings(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getPrice(
-      _listingId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getSellersListings(
-      _seller: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    listingToSeller(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    listings(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
     owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    removeListing(
-      _listingId: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -466,53 +486,48 @@ export interface Chese extends BaseContract {
 
     transferOwnership(
       newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    unlist(
+      itemId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    activeListings(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     createListing(
-      _name: string,
-      _price: BigNumberish,
-      _tokenId: BigNumberish,
-      _nftContract: string,
+      nftContract: string,
+      tokenId: BigNumberish,
+      price: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    getActiveListings(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    createListingSale(
+      nftContract: string,
+      itemId: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    fetchAllListings(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    fetchListings(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    fetchSellerListings(
+      seller: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getApproval(
+      nftContract: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     getNumActiveListings(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getPrice(
-      _listingId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getSellersListings(
-      _seller: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    listingToSeller(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    listings(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    removeListing(
-      _listingId: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -525,6 +540,11 @@ export interface Chese extends BaseContract {
 
     transferOwnership(
       newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    unlist(
+      itemId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

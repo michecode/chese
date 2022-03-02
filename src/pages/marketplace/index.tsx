@@ -6,90 +6,51 @@ import Layout from '../../components/Layout';
 // import Listing from '../../components/Listing';
 import Gradient from '../../images/iridescent-gradient.png';
 import { ethers } from 'ethers';
+import ListingCollection from '../../components/ListingCollection';
 
 const Index: React.FC<PageProps> = (props: PageProps) => {
   const W3C = useW3Context();
-  // const [balance, setBalance] = useState('');
-  // const [totalMinted, setTotalMinted] = useState(0);
 
-  // useEffect(() => {
-  //   getCount();
-  // }, []);
+  const [listings, setListings] = useState([{}]);
 
-  // const getCount = async () => {
-  //   if (W3C.contract) {
-  //     console.log(W3C.contract);
-  //     const count = await W3C.contract.count();
-  //     console.log('or am i OwO');
-  //     setTotalMinted(parseInt(count));
-  //   }
-  // };
+  useEffect(() => {
+    const fetchListings = async () => {
+      checkProvider();
+      console.log(W3C.contract);
+      const results = await W3C.contract?.fetchListings();
+      console.log(results);
+      setListings(results);
+    };
+    fetchListings();
+  }, []);
 
-  // const getBalance = async () => {
-  //   const [account] = await (window as any).ethereum.request({
-  //     method: 'eth_requestAccounts',
-  //   });
-  //   // const providers = new ethers.providers.Web3Provider(
-  //   //   (window as any).ethereum,
-  //   // );
-  //   if (W3C.provider) {
-  //     const balance = await W3C.provider.getBalance(account);
-  //     console.log(W3C);
-  //     setBalance(ethers.utils.formatEther(balance));
-  //   }
-  // };
+  /*
+  If wallet is connected. Contract should be updated.
+  If not connected, reupdate contract with just the provider. I don't need a signer for reading.
+  */
+  const checkProvider = () => {
+    if (W3C.connected) {
+      return;
+    } else {
+      W3C.updateContractWithApiProvider();
+      return;
+    }
+  };
 
   return (
     <Layout path={props.path}>
-      {/* <h1>Your Balance: {balance}</h1> */}
-      {/* <button onClick={() => getBalance()}>Show My Balance</button> */}
-      <button onClick={() => console.log(W3C)}>Log W3C</button>
+      <div className="mt-16 w-11/12 mx-auto">
+        <ListingCollection
+          dropState={false}
+          setDropState={() => {}}
+          isMarketpagePage={true}
+          listings={listings}
+          columns={7}
+        />
+      </div>
+      <button onClick={() => console.log(listings)}>log nft</button>
     </Layout>
   );
 };
-
-// const Listing: React.FC<ListingProps> = ({ tokenId, getCount }) => {
-//   const W3C = useW3Context;
-//   // const contentId = 'QmZf83wVQVxpXWNKftm9Uf7eeugANzxQabgoc7FUz3iveq';
-//   // const metadataURI = `${contentId}/${tokenId}.json`;
-//   // const imageURI = `${contentId}/${tokenId}.png`;
-//   // const [isMinted, setIsMinted] = useState(false);
-//   // useEffect(() => {
-//   //   getMintedStatus();
-//   // }, [isMinted]);
-
-//   // const getMintedStatus = async () => {
-//   //   // check undefined
-//   //   if (W3C.contract) {
-//   //     const result = await W3C.contract.isContentOwned(metadataURI);
-//   //     console.log(result);
-//   //     setIsMinted(result);
-//   //   }
-//   // };
-
-//   // const mintToken = async () => {
-//   //   if (W3C.contract && W3C.signer) {
-//   //     const connection = W3C.contract.connect(W3C.signer);
-//   //     const addr = connection.address;
-//   //     const result = await W3C.contract.payToMint(addr, metadataURI, {
-//   //       value: ethers.utils.parseEther('0.05'),
-//   //     });
-
-//   //     await result.wait();
-//   //     getMintedStatus();
-//   //     getCount();
-//   //   }
-//   // };
-
-//   // async function getURI() {
-//   //   if (W3C.contract) {
-//   //     const uri = await W3C.contract.tokenURI(tokenId);
-//   //     alert(uri);
-//   //   }
-//   // }
-//   return (
-
-//   );
-// };
 
 export default Index;

@@ -1,128 +1,194 @@
 import * as React from 'react';
 import { useState, useEffect, useContext } from 'react';
 import { Link } from 'gatsby';
-import { Web3Context } from './Web3Provider';
-import { ethers } from 'ethers';
+import { useW3Context } from './Web3Provider';
+import { ethers, BigNumber } from 'ethers';
 import Placeholder from '../images/media-not-found.png';
+import Modal from '../components/Modal';
+import ExternalLink from '../icons/ExternalLink';
 
 interface ListingProps {
-  mediaURL: string;
-  title: string;
+  mediaURLProp?: string;
+  titleProp?: string;
   price: string;
   contractAddr: string;
+  tokenId: string; // string of a number
+  itemId: string;
+  seller: string; // shouldnt need to do this
 }
 
+/*
+  mediaURL is both a link to a picture and used as a way to tell if this is a preview or a fetch
+*/
 const Listing: React.FC<ListingProps> = ({
-  mediaURL,
-  title,
+  mediaURLProp,
+  titleProp,
   price,
   contractAddr,
+  tokenId,
+  itemId,
+  seller,
 }) => {
-  // const W3C = useContext(Web3Context);
-  // const contentId = 'QmZf83wVQVxpXWNKftm9Uf7eeugANzxQabgoc7FUz3iveq';
-  // const metadataURI = `${contentId}/${tokenId}.json`;
-  // const imageURI = `${contentId}/${tokenId}.png`;
-  // const [isMinted, setIsMinted] = useState(false);
-  // useEffect(() => {
-  //   getMintedStatus();
-  // }, [isMinted]);
+  const W3C = useW3Context();
 
-  // const getMintedStatus = async () => {
-  //   // check undefined
-  //   if (W3C.contract) {
-  //     const result = await W3C.contract.isContentOwned(metadataURI);
-  //     console.log(result);
-  //     setIsMinted(result);
-  //   }
-  // };
+  useEffect(() => {
+    console.log('useEffect() in Listing.tsx');
+    if (!mediaURLProp || mediaURLProp == '') {
+      console.log('no media url passed into listing. fetching single nft.');
+      fetchOneNft();
+    } else {
+      setMedia(mediaURLProp);
+    }
+  }, [mediaURLProp]);
+  // without mediaURLProp dependency, it will not update pictures while previewing the listing creation.
 
-  // const mintToken = async () => {
-  //   if (W3C.contract && W3C.signer) {
-  //     const connection = W3C.contract.connect(W3C.signer);
-  //     const addr = connection.address;
-  //     const result = await W3C.contract.payToMint(addr, metadataURI, {
-  //       value: ethers.utils.parseEther('0.05'),
-  //     });
+  const [nft, setNft] = useState({});
+  const [media, setMedia] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
-  //     await result.wait();
-  //     getMintedStatus();
-  //     getCount();
-  //   }
-  // };
+  const fetchOneNft = async () => {
+    fetch(
+      `${
+        process.env.GATSBY_RINKEBY_ALCAPI
+      }/getNFTMetadata/?contractAddress=${contractAddr}&tokenId=${tokenId}&tokenType=${'ERC721'}`,
+      {
+        method: 'GET',
+        redirect: 'follow',
+      },
+    )
+      .then((response) => response.json())
+      .then((result) => {
+        console.log('found nft ' + result.title);
+        updateNft(result);
+      })
+      .catch((error) => console.log(error));
+  };
 
-  // async function getURI() {
-  //   if (W3C.contract) {
-  //     const uri = await W3C.contract.tokenURI(tokenId);
-  //     alert(uri);
-  //   }
-  // }
+  const updateNft = (result: any) => {
+    setNft(result);
+    setMedia(getMediaURL(result));
+  };
 
-  // const rebaseString = (num: string) => {
-  //   console.log(num);
-  //   let bigNum = ethers.BigNumber.from(num);
-  //   console.log(bigNum);
-  //   console.log(bigNum.toNumber());
-  //   return bigNum.toNumber();
-  // };
+  const getMediaURL = (nft: Object) => {
+    let mediaURL = '';
+    console.log('getting URL media from metadata');
+    if (nft.media[0].gateway == '') {
+      if (nft.metadata.image == '') {
+        fetch(nft.tokenURI.raw, {
+          method: 'GET',
+          redirect: 'follow',
+        })
+          .then((response) => response.json())
+          // .then((response) => JSON.stringify(response, null, 2))
+          .then((result) => {
+            mediaURL = result.image;
+          })
+          .catch((error) => console.log(error));
+      } else {
+        mediaURL = nft.metadata.image;
+      }
+    } else {
+      mediaURL = nft.media[0].gateway;
+    }
+    console.log(mediaURL);
+    return mediaURL;
+  };
 
-  /*
-    Only display art nfts.
-  */
-  if (
-    !mediaURL.startsWith('http') &&
-    !mediaURL.startsWith('ipfs') &&
-    mediaURL.includes('arianespace.jpg')
-  ) {
-    return <></>;
-  }
+  const validURL = (url: string) => {
+    if (url?.startsWith('http') || url?.startsWith('ipfs')) {
+      return url;
+    } else {
+      return '';
+    }
+  };
+
+  const unlist = () => {
+    // isn't a way to see button without having an account connected
+    if (W3C.connected && W3C.signer) {
+      W3C.contract?.unlist(BigNumber.from(itemId));
+    }
+  };
+
+  const buy = () => {
+    if (W3C.connected && W3C.signer) {
+      W3C.contract?.createListingSale(contractAddr, BigNumber.from(itemId), {
+        value: ethers.utils.parseEther(price),
+      });
+    } else {
+      alert('Please connect an ethereum wallet in order to buy this NFT.');
+    }
+  };
 
   return (
-    <div>
-      <div className="flex flex-col text-ellipsis border-2 border-black rounded-xl relative">
-        {/* <p className="">CREATE LISTING</p> */}
-        <div className="h-[375px] mx-auto flex">
-          <img
-            src={mediaURL}
-            className="rounded-xl max-h-full my-auto px-4 py-4"
-          />
-        </div>
-        <div className="ml-4 mb-2">
-          <h2>{title}</h2>
-          <div className="flex">
-            <a
-              href={`https://etherscan.io/address/${contractAddr}`}
-              target="_blank"
-              className="text-sky-600 underline mr-1"
-            >
-              Contract
-            </a>
-            <ExLinkIcon />
+    <>
+      <Modal showModal={showModal} setShowModal={setShowModal}>
+        <div className="m-8 flex">
+          <div className="w-1/2 h-[725px] my-auto flex border-2 border-black rounded-xl shrink-0">
+            <img
+              src={validURL(media)}
+              className="max-h-full m-auto px-4 py-4"
+            />
+          </div>
+          <div className="flex flex-col ml-4 my-auto h-[700px]">
+            <h1 className="text-6xl">{!titleProp ? nft?.title : titleProp}</h1>
+            <h1 className="text-3xl">{price + ' ETH'}</h1>
+            <h2 className="flex mt-4">
+              <p className="mr-2">Owned by: </p>
+              <a href={'https://etherscan.org/' + seller} className="underline">
+                {seller}
+              </a>
+              <ExternalLink />
+            </h2>
+            <div>
+              <button
+                className="bg-black text-white mx-8 my-8 p-4 text-3xl rounded-xl hover:uppercase"
+                onClick={() => buy()}
+              >
+                Buy
+              </button>
+              {W3C.account == seller?.toLowerCase() ? (
+                <button
+                  className="bg-black text-white mx-8 my-8 p-4 text-3xl rounded-xl hover:uppercase"
+                  onClick={() => unlist()}
+                >
+                  Remove Listing
+                </button>
+              ) : (
+                <></>
+              )}
+            </div>
           </div>
         </div>
+      </Modal>
+      <div onClick={() => setShowModal(!showModal)}>
+        <div className="flex flex-col text-ellipsis border-2 border-black rounded-xl hover:shadow-xl hover:cursor-pointer">
+          {/* <p className="">CREATE LISTING</p> */}
+          <div className="h-[375px] mx-auto flex">
+            <img
+              src={validURL(media)}
+              className="rounded-xl max-h-full my-auto px-4 py-4"
+            />
+          </div>
+          <div className="ml-4 mb-2 truncate">
+            <h2>{titleProp ? titleProp : nft?.title}</h2>
+            <div className="flex">
+              <a
+                href={`https://etherscan.io/address/${contractAddr}`}
+                target="_blank"
+                className="text-sky-600 underline mr-1"
+              >
+                Contract
+              </a>
+              <ExternalLink />
+            </div>
+          </div>
+        </div>
+        <div className="mt-2 mx-8 rounded-md bg-black text-white flex">
+          <p className="mx-auto">{price} ETHER</p>
+        </div>
       </div>
-      <div className="mt-2 mx-8 rounded-md bg-black text-white flex">
-        <p className="mx-auto">{price} ETHER</p>
-      </div>
-    </div>
+    </>
   );
 };
-
-function ExLinkIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      height="20"
-      width="20"
-    >
-      <path
-        xmlns="http://www.w3.org/2000/svg"
-        d="M14 5C13.4477 5 13 4.55228 13 4C13 3.44772 13.4477 3 14 3H20C20.2652 3 20.5196 3.10536 20.7071 3.29289C20.8946 3.48043 21 3.73478 21 4L21 10C21 10.5523 20.5523 11 20 11C19.4477 11 19 10.5523 19 10L19 6.41422L9.70711 15.7071C9.31658 16.0976 8.68342 16.0976 8.29289 15.7071C7.90237 15.3166 7.90237 14.6834 8.29289 14.2929L17.5858 5H14ZM3 7C3 5.89543 3.89543 5 5 5H10C10.5523 5 11 5.44772 11 6C11 6.55228 10.5523 7 10 7H5V19H17V14C17 13.4477 17.4477 13 18 13C18.5523 13 19 13.4477 19 14V19C19 20.1046 18.1046 21 17 21H5C3.89543 21 3 20.1046 3 19V7Z"
-        fill="#0D0D0D"
-      ></path>
-    </svg>
-  );
-}
 
 export default Listing;
