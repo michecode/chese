@@ -5,35 +5,6 @@ import CaretUp from '../icons/CaretUp';
 import CaretDown from '../icons/CaretDown';
 
 /*
-Listing[] returned from Chese contract looks like this
-
-Array [
-  {
-    0: Object { _hex: "0x01", _isBigNumber: true }
-    ...
-    6: true
-    active: boolean
-    listingId: {
-      _hex: "0x01",
-      _isBigNumber: true
-    },
-    nftContract: "0x..slay"
-    owner: "0x00"
-    price: {
-      _hex: "0x01"
-      _isBigNumber: true
-    }
-    seller: "0xFD..slay"
-    tokenId: {
-      _hex: "0x01"
-      _isBigNumber: true
-    }
-  }
-]
-
-*/
-
-/*
 @params
 dropState: passed in state from page to control whether the collection is display below the headline
 setDropState: state function from page
@@ -45,7 +16,7 @@ interface ListingCollectionProps {
   dropState: boolean;
   setDropState: Function;
   isMarketpagePage: boolean;
-  listings: Listing[];
+  listings: Listing[] | undefined;
   columns: number;
 }
 
@@ -56,14 +27,6 @@ const ListingCollection: React.FC<ListingCollectionProps> = ({
   listings,
   columns,
 }) => {
-  const checkListings = () => {
-    if (listings[0].price) {
-      return listings;
-    } else {
-      return [];
-    }
-  };
-
   /*
   @params
   @returns
@@ -71,14 +34,15 @@ const ListingCollection: React.FC<ListingCollectionProps> = ({
   */
   const listCollection = () => {
     let count = 0;
-    if (listings.length != 0) {
-      return checkListings().map((nft: Listing) => {
+    if (listings) {
+      console.log(listings);
+      return listings.map((nft: Listing) => {
         count++;
 
-        const priceRaw = BigNumber.from(nft.price?._hex);
+        const priceRaw = BigNumber.from(nft?.price._hex);
         const price = ethers.utils.formatEther(priceRaw);
-        const tokenId = BigNumber.from(nft.tokenId?._hex).toString();
-        const itemId = BigNumber.from(nft.itemId?._hex).toString();
+        const tokenId = BigNumber.from(nft?.tokenId._hex).toString();
+        const itemId = BigNumber.from(nft?.itemId._hex).toString();
         return (
           <Listing
             price={price}

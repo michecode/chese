@@ -42,7 +42,39 @@ const Listing: React.FC<ListingProps> = ({
   }, [mediaURLProp]);
   // without mediaURLProp dependency, it will not update pictures while previewing the listing creation.
 
-  const [nft, setNft] = useState({});
+  const emptySingleNFTRes: SingleNFTRes = {
+    contract: {
+      address: '',
+    },
+    id: {
+      tokenId: '',
+      tokenMetaData: {
+        tokenType: '',
+      },
+    },
+    media: [
+      {
+        raw: '',
+        gateway: '',
+      },
+    ],
+    metadata: {
+      description: '',
+      image: '',
+      name: '',
+      external_url: '',
+      background_color: '',
+      attributes: '',
+    },
+    timeLastUpdated: '',
+    title: '',
+    tokenURI: {
+      raw: '',
+      gateway: '',
+    },
+  };
+
+  const [nft, setNft] = useState<SingleNFTRes>(emptySingleNFTRes);
   const [media, setMedia] = useState('');
   const [showModal, setShowModal] = useState(false);
 
@@ -65,6 +97,7 @@ const Listing: React.FC<ListingProps> = ({
   };
 
   const updateNft = (result: any) => {
+    console.log(result);
     setNft(result);
     setMedia(getMediaURL(result));
   };

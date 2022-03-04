@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { useW3Context } from '../../components/Web3Provider';
 import { PageProps } from 'gatsby';
 import { BigNumber, ethers } from 'ethers';
 import Layout from '../../components/Layout';
 import Listing from '../../components/Listing';
 import UnlistedNFT from '../../components/UnlistedNFT';
-import ASpace from '../../images/arianespace.jpg';
 import Preview from '../../components/Preview';
 import NFTPreview from '../../components/NFTPreview';
 import Collection from '../../components/Collection';
@@ -31,7 +30,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
   const W3C = useW3Context();
 
   const [nfts, setNfts] = useState<AlchemyAPIResponse>(emptyAlcRes);
-  const [listings, setListings] = useState([{}]);
+  const [listings, setListings] = useState<Listing[]>();
   const [dropListings, setDropListings] = useState(true);
   const [dropCollection, setDropCollection] = useState(true);
   const [creatingListing, setCreatingListing] = useState(false);
@@ -46,19 +45,13 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
   const [listingContract, setListingContract] = useState('');
   const [listingTokenId, setListingTokenId] = useState('');
   const [slices, setSlices] = useState(1);
-  const [nftMedia, setNftMedia] = useState<object>({});
+  const [nftMedia, setNftMedia] = useState<FileList | null>();
   const [nftMediaUpload, setNftMediaUpload] = useState('');
   const [nftTitle, setNftTitle] = useState('');
   // This isn't a state because it breaks if it is a state..? The set function lags behind one call for no reason.
   let ipfsPath: string = '';
 
-  const ADDRESS = '0xFD424D0E0CD49D6AD8f08893CE0D53F8EAEB4213';
-  // const ADDRESS_ME = '0x6c5cae5Eb9d84880BC38B3c70D1Bf41b9f04142c';
-  // Gallery.so PapaBearded
-  const ADDRESS_PB = '0x1A53b8B97d76CB27E9c1Fb9a8087661E2D4842ba';
-  // Gallery.so MDP
-  // const ADDRESS = '0xf9CaA0e790a9a89FBd84E0cf1B455eEb1dC50d1D';
-
+  // update first render + on W3C.connected change
   useEffect(() => {
     getNfts(W3C.account);
     getListings();
@@ -129,7 +122,11 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
     setNftTitle(newValue);
   };
 
-  const onFileChange = (newValue: any) => {
+  const onFileChange = (newValue: FileList | null) => {
+    if (!newValue) {
+      console.log('DO NOT PASS IN NULL FILES!!!!!! STOP!!');
+      return;
+    }
     setNftMedia(newValue);
     setNftMediaUpload(URL.createObjectURL(newValue[0]));
     console.log('File Uploaded. Preview src @' + nftMediaUpload);
@@ -161,13 +158,11 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
   // TODO: Description functionality
   const mintNFT = async (url: string, name: string) => {
     // console.log('in mintNFT. ipfsPath: ' + ipfsPath);
-    const description = 'A great description.';
+    const description = 'Switchin it up pur.';
     //error handling
     if (url.trim() == '' || name.trim() == '' || description.trim() == '') {
-      return {
-        success: false,
-        status: '❗Please make sure all fields are completed before minting.',
-      };
+      alert('Please make sure all fields are completed before minting.');
+      return;
     }
 
     const metadata = {
@@ -177,38 +172,26 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
     };
 
     //pinata pin request
-    const pinataResponse = await pinJSONToIPFS(metadata);
+    const pinataResponse: PinataResponse = await pinJSONToIPFS(metadata);
     if (!pinataResponse) {
-      return {
-        success: false,
-        status: 'Response from pinata is undefined..?',
-      };
+      alert('Response from pinata is undefined..?');
+      return;
     }
     if (!pinataResponse.success) {
-      return {
-        success: false,
-        status: '😢 Something went wrong while uploading your tokenURI.',
-      };
+      alert('Something went wrong while uploading your tokenURI');
+      return;
     }
     const tokenURI = pinataResponse.pinataUrl;
-    console.log(tokenURI);
 
     try {
       console.log(W3C.minterContract);
       console.log('Minting NFT with metadata @' + tokenURI);
       await W3C.minterContract?.safeMint(W3C.account, tokenURI);
       setMintingNft(!mintingNft);
-      return {
-        success: true,
-        status:
-          '✅ Check out your transaction on Etherscan: https://ropsten.etherscan.io/tx/',
-      };
     } catch (error) {
-      return {
-        success: false,
-        status: '😥 Something went wrong: ' + error.message,
-      };
+      console.log(error);
     }
+    return;
   };
 
   const uploadAndMint = async () => {
@@ -219,6 +202,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
   return (
     <Layout path={props.path}>
       <div></div>
+      {/* account standard */}
       <div className="w-11/12 mx-auto mt-16">
         <div className="flex items-center">
           <h1 className="text-9xl mr-auto">{appropiateTitle()}</h1>
@@ -273,6 +257,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
           />
         </div>
       </div>
+      {/* create listing */}
       <div className="flex">
         <div
           className={

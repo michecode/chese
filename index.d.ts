@@ -43,6 +43,44 @@ interface AlchemyAPIResponse {
   blockHash: string;
 }
 
+interface PinataResponse {
+  success: boolean | undefined;
+  pinataUrl: string | undefined;
+  message: any;
+}
+
+interface SingleNFTRes extends Object {
+  contract: {
+    address: string;
+  };
+  id: {
+    tokenId: string;
+    tokenMetaData: {
+      tokenType: string;
+    };
+  };
+  media: [
+    {
+      raw: string;
+      gateway: string;
+    },
+  ];
+  metadata: {
+    description: string;
+    image: string;
+    name: string;
+    external_url: string;
+    background_color: string;
+    attributes: string;
+  };
+  timeLastUpdated: string;
+  title: string;
+  tokenURI: {
+    raw: string;
+    gateway: string;
+  };
+}
+
 interface Listing {
   0: {
     _hex: string;
@@ -63,7 +101,7 @@ interface Listing {
   active: boolean;
   itemId: {
     _hex: string;
-    _isBigNumber: string;
+    _isBigNumber: boolean;
   };
   length: number;
   nftContract: string;

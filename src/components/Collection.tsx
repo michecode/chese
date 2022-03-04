@@ -19,7 +19,7 @@ interface CollectionProps {
   nfts: {
     ownedNfts: NFTRes[];
     totalCount: number;
-    blockHask: string;
+    blockHash: string;
   };
   refresh: Function;
   columns: number;

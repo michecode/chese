@@ -10,7 +10,8 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ showModal, setShowModal, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const closeModal = (e) => {
+  // fix e typing later
+  const closeModal = (e: any) => {
     if (modalRef.current === e.target) {
       console.log('ref = e.target');
       setShowModal(false);

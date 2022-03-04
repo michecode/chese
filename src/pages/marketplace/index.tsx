@@ -7,11 +7,12 @@ import Layout from '../../components/Layout';
 import Gradient from '../../images/iridescent-gradient.png';
 import { ethers } from 'ethers';
 import ListingCollection from '../../components/ListingCollection';
+import { string } from 'hardhat/internal/core/params/argumentTypes';
 
 const Index: React.FC<PageProps> = (props: PageProps) => {
   const W3C = useW3Context();
 
-  const [listings, setListings] = useState([{}]);
+  const [listings, setListings] = useState<Listing[]>();
 
   useEffect(() => {
     const fetchListings = async () => {

@@ -7,7 +7,11 @@ export const pinJSONToIPFS = async (JSONBody: any) => {
   const url = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
 
   if (!pinataKey || !pinataSecret) {
-    return;
+    return {
+      success: false,
+      message: 'No pinata api / secret found.',
+      pinataUrl: '',
+    };
   }
   return axios
     .post(url, JSONBody, {
@@ -19,6 +23,7 @@ export const pinJSONToIPFS = async (JSONBody: any) => {
     .then((response) => {
       return {
         success: true,
+        message: '',
         pinataUrl:
           'https://gateway.pinata.cloud/ipfs/' + response.data.IpfsHash,
       };
@@ -27,6 +32,7 @@ export const pinJSONToIPFS = async (JSONBody: any) => {
       console.log(error);
       return {
         success: false,
+        pinataUrl: '',
         message: error.message,
       };
     });
