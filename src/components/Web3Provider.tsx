@@ -28,11 +28,30 @@ try {
   ipfs = undefined;
 }
 
-let providerTemp: ethers.providers.Web3Provider | undefined;
+const getAlchemyKey = () => {
+  const yeah = process.env.GATSBY_ALCHEMY_KEY;
+  if (yeah) {
+    return yeah;
+  } else {
+    return '';
+  }
+};
+
+let providerTemp:
+  | ethers.providers.Web3Provider
+  | ethers.providers.AlchemyProvider
+  | undefined;
 // Checking window for undefined for build time
 // Is ok to run further with undefined.
 if (typeof window !== 'undefined') {
-  providerTemp = new ethers.providers.Web3Provider(window.ethereum);
+  if (window.ethereum) {
+    providerTemp = new ethers.providers.Web3Provider(window.ethereum);
+  } else {
+    providerTemp = new ethers.providers.AlchemyProvider(
+      'rinkeby',
+      getAlchemyKey(),
+    );
+  }
 }
 
 // Chese V0.2.1
@@ -44,7 +63,10 @@ interface IWeb3Context {
   ipfs: IPFSHTTPClient | undefined;
   contractAddress: string;
   minterAddress: string;
-  provider: ethers.providers.Web3Provider | undefined;
+  provider:
+    | ethers.providers.Web3Provider
+    | ethers.providers.AlchemyProvider
+    | undefined;
   setProvider: Function;
   signer: ethers.providers.JsonRpcSigner | undefined;
   setSigner: Function;
@@ -87,15 +109,6 @@ interface Web3ProviderProps {
 }
 
 const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
-  const getAlchemyKey = () => {
-    const yeah = process.env.GATSBY_ALCHEMY_KEY;
-    if (yeah) {
-      return yeah;
-    } else {
-      return '';
-    }
-  };
-
   const [provider, setProvider] = useState(providerTemp);
   const [signer, setSigner] = useState(undefined);
   const [contract, setContract] = useState(
@@ -119,7 +132,11 @@ const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     setContract(yeah);
   };
   const updateContractWithApiProvider = () => {
-    const yeah = new ethers.Contract(CONTRACT_ADDRESS, Chese.abi);
+    const yeah = new ethers.Contract(
+      CONTRACT_ADDRESS,
+      Chese.abi,
+      new ethers.providers.AlchemyProvider('rinkeby', getAlchemyKey()),
+    );
     setContract(yeah);
     console.log(yeah);
   };

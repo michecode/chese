@@ -142,6 +142,7 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
                   ERC-1155 tokens are completely(?) unsupported, cannot receive
                   them either.
                 </li>
+                <li>I have a memory leak somewhere??</li>
                 <div className="flex">
                   <p className="text-7xl ">
                     Have Fun. Please don't break anything

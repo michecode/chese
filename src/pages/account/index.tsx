@@ -324,7 +324,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
           />
         </div>
       </div>
-
+      {/* minting */}
       <div className="flex">
         <div
           className={

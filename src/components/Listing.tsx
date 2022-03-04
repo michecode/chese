@@ -173,15 +173,19 @@ const Listing: React.FC<ListingProps> = ({
               <ExternalLink />
             </h2>
             <div>
+              <h1 className="text-2xl mt-4">Description</h1>
+              <p>Temporary description.</p>
+            </div>
+            <div className={'mt-auto flex ' + (W3C.connected ? '' : 'hidden')}>
               <button
-                className="bg-black text-white mx-8 my-8 p-4 text-3xl rounded-xl hover:uppercase"
+                className="bg-black text-white w-1/2 mx-2 p-4 text-3xl rounded-xl hover:uppercase"
                 onClick={() => buy()}
               >
                 Buy
               </button>
               {W3C.account == seller?.toLowerCase() ? (
                 <button
-                  className="bg-black text-white mx-8 my-8 p-4 text-3xl rounded-xl hover:uppercase"
+                  className="bg-black text-white w-1/2 mx-2 p-4 text-3xl rounded-xl hover:uppercase"
                   onClick={() => unlist()}
                 >
                   Remove Listing
@@ -190,6 +194,19 @@ const Listing: React.FC<ListingProps> = ({
                 <></>
               )}
             </div>
+            <button
+              className={
+                'mt-auto text-3xl p-4 bg-gradient bg-cover text-white rounded-xl hover:uppercase ' +
+                (W3C.connected ? 'hidden' : '')
+              }
+              onClick={() => {
+                alert(
+                  'Please connect wallet using the button in the navigation.',
+                );
+              }}
+            >
+              Connect Wallet To Buy
+            </button>
           </div>
         </div>
       </Modal>
