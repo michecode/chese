@@ -46,7 +46,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
           setDropState={() => {}}
           isMarketpagePage={true}
           listings={listings}
-          columns={7}
+          columns={5}
         />
       </div>
       <button onClick={() => console.log(listings)}>log nft</button>

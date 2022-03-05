@@ -143,6 +143,9 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
                 setApprovalForAll with ethers..?)
               </li>
               <li>
+                NFT Collection per account. Need to learn contract factory.
+              </li>
+              <li>
                 Convert to Next.js so I can utilise server side rendering.
                 Cannot afford servers right now lol.
               </li>
