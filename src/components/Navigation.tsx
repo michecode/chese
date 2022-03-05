@@ -137,7 +137,7 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
               </p>
               <h1 className="text-xl mt-2">Planned Features:</h1>
               <li>ERC-1155 Support.</li>
-              <li>NFT Slices. Requires ERC-1155 first.</li>
+              <li>NFT Slices. Requires ERC-1155 support.</li>
               <li>
                 Listing arbitrary NFT contracts. (Figure out how to call their
                 setApprovalForAll with ethers..?)
@@ -146,22 +146,32 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
                 NFT Collection per account. Need to learn contract factory.
               </li>
               <li>
+                Create some sort of feedback after minting/listing. Currently
+                everything is in console logs and actual users will not know
+                what's going on.
+              </li>
+              <li>
                 Convert to Next.js so I can utilise server side rendering.
                 Cannot afford servers right now lol.
               </li>
-              <li>Searching.</li>
+              <li>
+                Searching... I think I'm going to use elasticsearch in addition
+                to building a backend database that can hold nft data instead of
+                spamming Alchemy with API requests.
+              </li>
               <li>Port to zkSync's 2.0 testnet.</li>
               <h1 className="text-xl mt-2">Known Limits:</h1>
               <li>
                 I made it so the website will just turn off if your screen isn't
                 wide enough. I do not want to make it responsive because...!!
-                Not testing anything besides my 1080p screen. Focused entirely
-                on learning/building Web3 functionality.
+                Not going to test on other screen sizes until I rewrite the code
+                base so prob like soon.
               </li>
               <li>
                 Metamask is the only wallet tested. Maybe works with other
                 injector wallets but idc
               </li>
+              <li>Does not listen for chain changes or user disconnects.</li>
               <li className="">
                 You are only able to list NFTs minted by the helper contract on
                 this website. It's possible to list others technically but not
@@ -171,10 +181,7 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
               <li className="line-through">
                 Listing prices can only use integers.
               </li>
-              <li>
-                ERC-1155 tokens are completely(?) unsupported, cannot receive
-                them either.
-              </li>
+              <li>ERC-1155 tokens are completely(?) unsupported.</li>
               <li>I have a memory leak somewhere??</li>
               <div className="flex">
                 <p className="text-7xl ">
