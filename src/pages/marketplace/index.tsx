@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { PageProps } from 'gatsby';
-import { useW3Context } from '../../components/Web3Provider';
+import { ACTIONS, useW3Context } from '../../components/Web3Provider';
 import Layout from '../../components/Layout';
 // import Listing from '../../components/Listing';
 import Gradient from '../../images/iridescent-gradient.png';
@@ -33,7 +33,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
     if (W3C.connected) {
       return;
     } else {
-      W3C.updateContractWithApiProvider();
+      W3C.dispatch({ type: ACTIONS.UPDATE_CONTRACT_ALCHEMY });
       return;
     }
   };

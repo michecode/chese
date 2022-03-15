@@ -1,15 +1,37 @@
 import * as React from 'react';
-import { useContext, useState, useEffect } from 'react';
-// import Plants from '../artifacts/contracts/Plants.sol/Plants.json';
+import { useContext, useReducer } from 'react';
 import Chese from '../artifacts/contracts/Chese.sol/Chese.json';
 import Minter from '../artifacts/contracts/CheseNFTs.sol/CheseNFTs.json';
 import { ethers } from 'ethers';
-import { create, CID, IPFSHTTPClient } from 'ipfs-http-client';
+import { create, IPFSHTTPClient } from 'ipfs-http-client';
 
 declare global {
   interface Window {
     ethereum: any;
   }
+}
+
+interface Web3ProviderProps {
+  children?: JSX.Element | JSX.Element[];
+}
+
+interface Web3State {
+  ipfs: IPFSHTTPClient | undefined;
+  contractAddress: string;
+  minterAddress: string;
+  provider:
+    | ethers.providers.Web3Provider
+    | ethers.providers.AlchemyProvider
+    | undefined;
+  signer: ethers.providers.JsonRpcSigner | undefined;
+  contract: ethers.Contract | undefined;
+  minterContract: ethers.Contract | undefined;
+  account: string;
+  connected: boolean;
+}
+
+interface IWeb3Context extends Web3State {
+  dispatch: Function;
 }
 
 let ipfs: IPFSHTTPClient | undefined;
@@ -29,19 +51,18 @@ try {
 }
 
 const getAlchemyKey = () => {
-  const yeah = process.env.GATSBY_ALCHEMY_KEY;
-  if (yeah) {
-    return yeah;
-  } else {
-    return '';
+  const key = process.env.GATSBY_ALCHEMY_KEY;
+  if (key) {
+    return key;
   }
+  return '';
 };
 
 let providerTemp:
   | ethers.providers.Web3Provider
   | ethers.providers.AlchemyProvider
   | undefined;
-// Checking window for undefined for build time
+// Window does not exist in build server. Check if exists so that build does not crash.
 // Is ok to run further with undefined.
 if (typeof window !== 'undefined') {
   if (window.ethereum) {
@@ -59,117 +80,110 @@ const CONTRACT_ADDRESS = '0xA2C80855Cf67268E8415ba9311095A79886ddAA8';
 
 const MINTER_ADDRESS = '0x2f4EC6452B30a1a67dDe768e1Aa52c4d99093f0E';
 
-interface IWeb3Context {
-  ipfs: IPFSHTTPClient | undefined;
-  contractAddress: string;
-  minterAddress: string;
-  provider:
-    | ethers.providers.Web3Provider
-    | ethers.providers.AlchemyProvider
-    | undefined;
-  setProvider: Function;
-  signer: ethers.providers.JsonRpcSigner | undefined;
-  setSigner: Function;
-  contract: ethers.Contract | undefined;
-  updateContract: Function;
-  updateContractWithApiProvider: Function;
-  minterContract: ethers.Contract | undefined;
-  updateMinterContract: Function;
-  account: string;
-  updateAccount: Function;
-  connected: boolean;
-  setConnected: Function;
-}
+const defaultContract = new ethers.Contract(
+  CONTRACT_ADDRESS,
+  Chese.abi,
+  new ethers.providers.AlchemyProvider('rinkeby', getAlchemyKey()),
+);
 
-export const Web3Context = React.createContext<IWeb3Context>({
+const defaultMinterContract = new ethers.Contract(MINTER_ADDRESS, Minter.abi);
+
+const defaultState: Web3State = {
   ipfs: ipfs,
   contractAddress: CONTRACT_ADDRESS,
   minterAddress: MINTER_ADDRESS,
   provider: providerTemp,
-  setProvider: () => {},
   signer: undefined,
-  setSigner: () => {},
-  contract: undefined,
-  updateContract: () => {},
-  updateContractWithApiProvider: () => {},
-  minterContract: undefined,
-  updateMinterContract: () => {},
+  contract: defaultContract,
+  minterContract: defaultMinterContract,
   account: 'Not Connected',
-  updateAccount: () => {},
   connected: false,
-  setConnected: () => {},
+};
+
+export const Web3Context = React.createContext<IWeb3Context>({
+  ...defaultState,
+  dispatch: () => {},
 });
+
+export const ACTIONS = {
+  SET_PROVIDER: 'set-provider',
+  SET_SIGNER: 'set-signer',
+  UPDATE_CONTRACT_SIGNER: 'update-contract-signer',
+  UPDATE_CONTRACT_ALCHEMY: 'update-contract-alchemy',
+  UPDATE_MINTER_CONTRACT: 'update-minter-contract',
+  SET_ACCOUNT: 'update-account',
+  SET_CONNECTED: 'set-connected',
+};
+
+function reducer(state: Web3State, action: any) {
+  switch (action.type) {
+    case ACTIONS.SET_PROVIDER:
+      return {
+        ...state,
+        provider: action.payload.provider,
+      };
+    case ACTIONS.SET_SIGNER:
+      return {
+        ...state,
+        signer: action.payload.signer,
+      };
+    case ACTIONS.UPDATE_CONTRACT_SIGNER:
+      const newContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        Chese.abi,
+        action.payload.signer,
+      );
+      return {
+        ...state,
+        contract: newContract,
+      };
+    case ACTIONS.UPDATE_CONTRACT_ALCHEMY:
+      const alchemyContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        Chese.abi,
+        new ethers.providers.AlchemyProvider('rinkeby', getAlchemyKey()),
+      );
+      return {
+        ...state,
+        contract: alchemyContract,
+      };
+    case ACTIONS.UPDATE_MINTER_CONTRACT:
+      const newMinterContract = new ethers.Contract(
+        MINTER_ADDRESS,
+        Minter.abi,
+        action.payload.signer,
+      );
+      return {
+        ...state,
+        minterContract: newMinterContract,
+      };
+    case ACTIONS.SET_ACCOUNT:
+      return {
+        ...state,
+        account: action.payload.account,
+      };
+    case ACTIONS.SET_CONNECTED:
+      return {
+        ...state,
+        connected: true,
+      };
+    default:
+      return state;
+  }
+}
 
 export const useW3Context = () => {
   return useContext(Web3Context);
 };
 
-interface Web3ProviderProps {
-  children?: JSX.Element | JSX.Element[];
-}
-
 const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
-  const [provider, setProvider] = useState(providerTemp);
-  const [signer, setSigner] = useState(undefined);
-  const [contract, setContract] = useState(
-    // if(typeof providerTemp == ethers.providers.Web3Provider)
-    new ethers.Contract(
-      CONTRACT_ADDRESS,
-      Chese.abi,
-      new ethers.providers.AlchemyProvider('rinkeby', getAlchemyKey()),
-    ),
+  const [state, dispatch] = useReducer(reducer, defaultState);
+
+  return (
+    <Web3Context.Provider value={{ ...state, dispatch }}>
+      {children}
+    </Web3Context.Provider>
   );
-  const [minterContract, setMinterContract] = useState(
-    new ethers.Contract(MINTER_ADDRESS, Minter.abi),
-  );
-  const [account, setAccount] = useState('Not Connected');
-  const updateAccount = (accountTemp: string) => {
-    setAccount(accountTemp);
-  };
-  const [connected, setConnected] = useState(false);
-  const updateContract = (signer: ethers.providers.JsonRpcSigner) => {
-    const yeah = new ethers.Contract(CONTRACT_ADDRESS, Chese.abi, signer);
-    setContract(yeah);
-  };
-  const updateContractWithApiProvider = () => {
-    const yeah = new ethers.Contract(
-      CONTRACT_ADDRESS,
-      Chese.abi,
-      new ethers.providers.AlchemyProvider('rinkeby', getAlchemyKey()),
-    );
-    setContract(yeah);
-    console.log(yeah);
-  };
-
-  const updateMinterContract = (signer: ethers.providers.JsonRpcSigner) => {
-    const booyeah = new ethers.Contract(MINTER_ADDRESS, Minter.abi, signer);
-    setMinterContract(booyeah);
-  };
-
-  const value = {
-    ipfs: ipfs,
-    contractAddress: CONTRACT_ADDRESS,
-    minterAddress: MINTER_ADDRESS,
-    provider,
-    setProvider,
-    signer,
-    setSigner,
-    contract,
-    updateContract,
-    updateContractWithApiProvider,
-    minterContract,
-    updateMinterContract,
-    account,
-    updateAccount,
-    connected,
-    setConnected,
-  };
-
-  console.log(value);
-  // useEffect(() => {});
-
-  // console.log(value);
-  return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>;
 };
 
 export default Web3Provider;

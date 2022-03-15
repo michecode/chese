@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useContext, useState, useEffect } from 'react';
-import { useW3Context } from './Web3Provider';
+import { ACTIONS, useW3Context } from './Web3Provider';
 import { Link } from 'gatsby';
 import { ethers } from 'ethers';
 import Ethers from '@typechain/ethers-v5';
@@ -65,7 +65,10 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
 
   const accountChangedHandler = (newAccount: string) => {
     console.log('updating account');
-    W3C.updateAccount(newAccount);
+    W3C.dispatch({
+      type: ACTIONS.SET_ACCOUNT,
+      payload: { account: newAccount },
+    });
     updateEthers(newAccount);
     console.log(W3C);
   };
@@ -74,12 +77,21 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
     // console.log('attempting to update account state to: ' + account);
     // W3C.updateAccount(account);
     const tempProvider = new ethers.providers.Web3Provider(window.ethereum);
-    W3C.setProvider(tempProvider);
+    W3C.dispatch({
+      type: ACTIONS.SET_PROVIDER,
+      payload: { provider: tempProvider },
+    });
     const tempSigner = tempProvider.getSigner(account);
-    W3C.setSigner(tempSigner);
-    W3C.updateContract(tempSigner);
-    W3C.updateMinterContract(tempSigner);
-    W3C.setConnected(true);
+    W3C.dispatch({ type: ACTIONS.SET_SIGNER, payload: { signer: tempSigner } });
+    W3C.dispatch({
+      type: ACTIONS.UPDATE_CONTRACT_SIGNER,
+      payload: { signer: tempSigner },
+    });
+    W3C.dispatch({
+      type: ACTIONS.UPDATE_MINTER_CONTRACT,
+      payload: { signer: tempSigner },
+    });
+    W3C.dispatch({ type: ACTIONS.SET_CONNECTED });
   };
 
   console.log(path);
