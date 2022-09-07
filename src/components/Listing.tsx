@@ -81,7 +81,7 @@ const Listing: React.FC<ListingProps> = ({
   const fetchOneNft = async () => {
     fetch(
       `${
-        process.env.GATSBY_RINKEBY_ALCAPI
+        process.env.GATSBY_ALCHEMY_URL
       }/getNFTMetadata/?contractAddress=${contractAddr}&tokenId=${tokenId}&tokenType=${'ERC721'}`,
       {
         method: 'GET',
@@ -128,6 +128,7 @@ const Listing: React.FC<ListingProps> = ({
   };
 
   const validURL = (url: string) => {
+    console.log('in valid url', url);
     if (url?.startsWith('http') || url?.startsWith('ipfs')) {
       return url;
     } else {

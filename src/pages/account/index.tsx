@@ -18,7 +18,7 @@ import ListingCollection from '../../components/ListingCollection';
 omg!??!?!11! why are you using axios and fetch. because. i need axios for pinata and im not fixing fetch rn.
 */
 
-const rkAlc = process.env.GATSBY_RINKEBY_ALCAPI;
+const goerliAlc = process.env.GATSBY_ALCHEMY_URL;
 
 const emptyAlcRes = {
   ownedNfts: [],
@@ -72,7 +72,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
     if (address != 'Not Connected' && address) {
       console.log('Fetching all nfts for account: ' + address);
       console.log('FETCHING!!!! SLAY!!! PLEASE WAIT!!!');
-      fetch(`${rkAlc}/getNFTs/?owner=${address}`, {
+      fetch(`${goerliAlc}/getNFTs/?owner=${address}`, {
         method: 'GET',
         redirect: 'follow',
       })
@@ -92,6 +92,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
       /*
       MAKE SURE YOU KEEP THE AWAIT OTHERWISE YOU GET A PROMISE TYPE!! NOT AN ARRAY TYPE!!
       */
+      console.log('AHHHH IM ABOUT TO CRASH!! (?)');
       const fetch = await W3C.contract?.fetchSellerListings(W3C.account);
       setListings(fetch);
     }
@@ -150,6 +151,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
       return alert('No Files Selected');
     }
     const file = nftMedia[0];
+    console.log('hmmm not good');
     const result = await (W3C.ipfs as IPFSHTTPClient).add(file);
     console.log(result);
     ipfsPath = result.path;

@@ -142,7 +142,7 @@ const Navigation: React.FC<NavigationProps> = ({ path }) => {
 
               <p>
                 Hi. This is Chese. Pronounced "Cheese" or maybe "Chess". A NFT
-                marketplace live on the Rinkeby testnet. Currently, the contract
+                marketplace live on the Goerli testnet. Currently, the contract
                 has the ability to list, unlist, and sell ERC-721 tokens. You
                 can also mint your own NFTs (ERC721 only). This website includes
                 minting functionality, hosted using IPFS!

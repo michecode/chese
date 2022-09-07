@@ -11,6 +11,7 @@ typechain
 
 #Hardhat files
 cache
+hardhat.config.ts
 # including abis by avoiding the contracts folder
 @openzeppelin
 build-info

@@ -14,7 +14,7 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  if (true) {
+  if (false) {
     const Chese = await ethers.getContractFactory('Chese');
     const chese = await Chese.deploy();
 

@@ -37,7 +37,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
         </div>
       </div>
       <div className="my-36 mx-auto w-10/12 flex flex-col">
-        <h1 className="text-7xl mx-auto">
+        <h1 className="2xl:text-7xl text-6xl mx-auto">
           No algorithmically generated collections
         </h1>
         <p className="text-xl mx-auto mt-8">
@@ -76,7 +76,7 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
             </p>
           </Link>
         </div>
-        <img src={WackGroup} className="absolute -right-32" />
+        <img src={WackGroup} className="absolute -right-32 2xl:w-fit w-3/4" />
       </div>
       <div className="flex flex-col mt-80">
         <h1 className="text-6xl text-right mr-16">

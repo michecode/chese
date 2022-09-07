@@ -8,7 +8,7 @@ To run this repo you'll need 2 files that are not uploaded to github.
 
 ```
 GATSBY_ALCHEMY_KEY=<your alchemy api key>
-GATSBY_RINKEBY_ALCAPI=<your alchemy api url>
+GATSBY_ALCHEMY_URL=<your alchemy api url>
 GATSBY_PINATA_KEY=<pinata key>
 GATSBY_PINATA_SECRET=<pinata secret>
 GATSBY_INFURA_ID=<infura id>

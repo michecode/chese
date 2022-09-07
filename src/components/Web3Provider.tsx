@@ -3,7 +3,10 @@ import { useContext, useReducer } from 'react';
 import Chese from '../artifacts/contracts/Chese.sol/Chese.json';
 import Minter from '../artifacts/contracts/CheseNFTs.sol/CheseNFTs.json';
 import { ethers } from 'ethers';
-import { create, IPFSHTTPClient } from 'ipfs-http-client';
+import { IPFSHTTPClient } from 'ipfs-http-client';
+const ipfsClient = require('ipfs-http-client');
+// var Buffer = require('buffer/').Buffer;
+import { Buffer } from 'Buffer';
 
 declare global {
   interface Window {
@@ -36,11 +39,17 @@ interface IWeb3Context extends Web3State {
 
 let ipfs: IPFSHTTPClient | undefined;
 const infuraId = process.env.GATSBY_INFURA_ID;
+// const infuraId = '25jkAET2S7fGEYdehmba8U0pTL6';
 const infuraSecret = process.env.GATSBY_INFURA_SECRET;
-const authorization = 'Basic ' + btoa(infuraId + ':' + infuraSecret);
+// const infuraSecret = '88c27996e7df5c9a3ece102e207bf35e';
+const authorization =
+  'Basic ' + Buffer.from(infuraId + ':' + infuraSecret).toString('base64');
+
 try {
-  ipfs = create({
-    url: 'https://ipfs.infura.io:5001',
+  ipfs = ipfsClient.create({
+    host: 'ipfs.infura.io',
+    port: 5001,
+    protocol: 'https',
     headers: {
       authorization,
     },
@@ -69,21 +78,21 @@ if (typeof window !== 'undefined') {
     providerTemp = new ethers.providers.Web3Provider(window.ethereum);
   } else {
     providerTemp = new ethers.providers.AlchemyProvider(
-      'rinkeby',
+      'goerli',
       getAlchemyKey(),
     );
   }
 }
 
 // Chese V0.2.1
-const CONTRACT_ADDRESS = '0xA2C80855Cf67268E8415ba9311095A79886ddAA8';
+const CONTRACT_ADDRESS = '0xe3098e4DaA93c7dD938910D7B9c10831eBE641B3';
 
-const MINTER_ADDRESS = '0x2f4EC6452B30a1a67dDe768e1Aa52c4d99093f0E';
+const MINTER_ADDRESS = '0x59aC7dae22a5bB007a3F56164abAf04a13e7cACD';
 
 const defaultContract = new ethers.Contract(
   CONTRACT_ADDRESS,
   Chese.abi,
-  new ethers.providers.AlchemyProvider('rinkeby', getAlchemyKey()),
+  new ethers.providers.AlchemyProvider('goerli', getAlchemyKey()),
 );
 
 const defaultMinterContract = new ethers.Contract(MINTER_ADDRESS, Minter.abi);
@@ -141,7 +150,7 @@ function reducer(state: Web3State, action: any) {
       const alchemyContract = new ethers.Contract(
         CONTRACT_ADDRESS,
         Chese.abi,
-        new ethers.providers.AlchemyProvider('rinkeby', getAlchemyKey()),
+        new ethers.providers.AlchemyProvider('goerli', getAlchemyKey()),
       );
       return {
         ...state,
