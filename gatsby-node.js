@@ -10,7 +10,7 @@ exports.onCreateWebpackConfig = ({ actions }) => {
     resolve: {
       fallback: {
         crypto: false,
-        stream: require.resolve('stream-browserify'),
+        stream: false,
         assert: false,
         util: false,
         http: false,
