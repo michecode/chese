@@ -46,6 +46,14 @@ const Listing: React.FC<ListingProps> = ({
     }
   };
 
+  const convertToInfura = (url: string) => {
+    if (!url.startsWith('https://ipfs')) {
+      return url;
+    }
+    const hash = url.slice(21);
+    return `https://chese.infura-ipfs.io/ipfs/${hash}`;
+  };
+
   return (
     <div
       className={
@@ -56,7 +64,7 @@ const Listing: React.FC<ListingProps> = ({
     >
       <div className="h-[375px] mx-auto flex">
         <img
-          src={mediaURL}
+          src={convertToInfura(mediaURL)}
           className={
             'rounded-xl max-h-full my-auto px-4 py-4 ' +
             (clickToList ? 'group-hover:hidden' : '')

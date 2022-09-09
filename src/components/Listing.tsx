@@ -130,7 +130,8 @@ const Listing: React.FC<ListingProps> = ({
   const validURL = (url: string) => {
     console.log('in valid url', url);
     if (url?.startsWith('http') || url?.startsWith('ipfs')) {
-      return url;
+      const hash = url.slice(21);
+      return `https://chese.infura-ipfs.io/ipfs/${hash}`;
     } else {
       return '';
     }

@@ -93,7 +93,10 @@ const Index: React.FC<PageProps> = (props: PageProps) => {
       MAKE SURE YOU KEEP THE AWAIT OTHERWISE YOU GET A PROMISE TYPE!! NOT AN ARRAY TYPE!!
       */
       console.log('AHHHH IM ABOUT TO CRASH!! (?)');
+      console.log(W3C.contract, 'contract');
+      console.log(W3C, 'cunt');
       const fetch = await W3C.contract?.fetchSellerListings(W3C.account);
+      console.log(fetch, 'lmfaorofl');
       setListings(fetch);
     }
   };
