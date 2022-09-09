@@ -6,7 +6,13 @@ import { ethers } from 'ethers';
 import { IPFSHTTPClient } from 'ipfs-http-client';
 const ipfsClient = require('ipfs-http-client');
 // var Buffer = require('buffer/').Buffer;
-import { Buffer } from 'Buffer';
+import { Buffer } from 'buffer';
+
+const isBrowser = typeof window !== 'undefined';
+if (isBrowser) {
+  // @ts-ignore
+  window.Buffer = Buffer;
+}
 
 declare global {
   interface Window {
@@ -42,6 +48,7 @@ const infuraId = process.env.GATSBY_INFURA_ID;
 // const infuraId = '25jkAET2S7fGEYdehmba8U0pTL6';
 const infuraSecret = process.env.GATSBY_INFURA_SECRET;
 // const infuraSecret = '88c27996e7df5c9a3ece102e207bf35e';
+
 const authorization =
   'Basic ' + Buffer.from(infuraId + ':' + infuraSecret).toString('base64');
 
